@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Performance Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .problem-statement {
+            background: #fff3cd;
+            border-left: 4px solid #856404;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .problem-statement h3 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .sections-grid {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section-header {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .column {
+            padding: 25px;
+        }
+        
+        .column.current {
+            background: #fef9f9;
+            border-right: 2px solid #e0e0e0;
+        }
+        
+        .column.optimal {
+            background: #f9fefb;
+        }
+        
+        .column-title {
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+        
+        .current .column-title {
+            color: #c0392b;
+            border-color: #e74c3c;
+        }
+        
+        .optimal .column-title {
+            color: #27ae60;
+            border-color: #2ecc71;
+        }
+        
+        .attribute-block {
+            margin-bottom: 20px;
+        }
+        
+        .attribute-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .attribute-content {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .current .attribute-content {
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .optimal .attribute-content {
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .metric-highlight {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .current .metric-highlight {
+            background: #ffebeb;
+            color: #c0392b;
+        }
+        
+        .optimal .metric-highlight {
+            background: #e8f8f5;
+            color: #27ae60;
+        }
+        
+        .key-insights {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .insights-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .insight-icon {
+            width: 8px;
+            height: 8px;
+            background: #3498db;
+            border-radius: 50%;
+            margin-right: 15px;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        
+        .insight-text {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        /* Trend Graph Styles */
+        .trend-graph-section {
+            margin-top: 40px;
+        }
+        
+        .trend-header {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .trend-header h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .trend-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .trend-graph-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        #trendChart {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .graph-legend {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 3px;
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gym Trial Conversion Analysis</h1>
+            <div class="subtitle">Identifying Key Performance Gaps Across Locations</div>
+        </div>
+        
+        <div class="problem-statement">
+            <h3>Core Issue</h3>
+            <div>Despite standardized processes, trial reservation and conversion rates vary significantly across gym locations. Analysis reveals three critical areas of variation.</div>
+        </div>
+        
+        <div class="sections-grid">
+            <!-- MS Team Section -->
+            <div class="section">
+                <div class="section-header">1. Office Team Inquiry Handling</div>
+                <div class="comparison-grid">
+                    <div class="column current">
+                        <div class="column-title">Current State: Administrative Mindset</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Primary Mission</div>
+                            <div class="attribute-content">To Process Forms Accurately - Focus on handling inquiry queue without procedural mistakes</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Key Metric</div>
+                            <div class="attribute-content">
+                                <span class="metric-highlight">Error Rate</span> - Success measured by avoiding mistakes, encouraging slow and risk-averse behavior
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Approach</div>
+                            <div class="attribute-content">Reactive Scheduling - Back-and-forth schedule adjustment via LINE, waiting for customer replies</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Definition of Done</div>
+                            <div class="attribute-content">Form processed and messages answered correctly</div>
+                        </div>
+                    </div>
+                    
+                    <div class="column optimal">
+                        <div class="column-title">Optimal State: Growth Mindset (DRT)</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Primary Mission</div>
+                            <div class="attribute-content">To Convert Leads with Speed - Turn digital inquiries into booked appointments as fast as possible</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Key Metrics</div>
+                            <div class="attribute-content">
+                                <span class="metric-highlight">Response Time & Booking Rate</span> - Success measured by speed and results, encouraging proactive behavior
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Approach</div>
+                            <div class="attribute-content">Proactive Booking - Live calendar to offer immediate slots, closing bookings in single conversations</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Definition of Done</div>
+                            <div class="attribute-content">Trial booked on the calendar</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simple Performance Graph -->
+                
+                
+                <!-- Simple Performance Graph -->
+                
+            </div>
+            
+            <!-- Trainer Section -->
+            <div class="section">
+                <div class="section-header">2. Trainer Performance</div>
+                <div class="comparison-grid">
+                    <div class="column current">
+                        <div class="column-title">Current State: Trainer as Host</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Primary Mission</div>
+                            <div class="attribute-content">To Deliver a Good Workout - Make sure the person has fun and gets a good sweat</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Mindset</div>
+                            <div class="attribute-content">"I hope they liked the class"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Before Trial</div>
+                            <div class="attribute-content">Greets the person warmly when they arrive</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">During Trial</div>
+                            <div class="attribute-content">Shows exercises, corrects form, creates fun atmosphere</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">After Trial</div>
+                            <div class="attribute-content">"Thanks for coming! Hope to see you again soon!"</div>
+                        </div>
+                    </div>
+                    
+                    <div class="column optimal">
+                        <div class="column-title">Optimal State: Trainer as Closer</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Primary Mission</div>
+                            <div class="attribute-content">To Convert a Prospect into a Member - Prove the gym is the specific solution to their problem</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Mindset</div>
+                            <div class="attribute-content">"I need to understand their 'why' and show them the path forward"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Before Trial</div>
+                            <div class="attribute-content">Reviews prospect notes from DRT, knows their name and goals before arrival</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">During Trial</div>
+                            <div class="attribute-content">Delivers great workout PLUS connects experience to prospect's goals: "You wanted to relieve stress—this is the best way!"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">After Trial</div>
+                            <div class="attribute-content">Structured post-workout debrief - sits down, asks about experience, presents membership as logical next step</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Journey Section -->
+            <div class="section">
+                <div class="section-header">3. Customer Behavior & Experience</div>
+                <div class="comparison-grid">
+                    <div class="column current">
+                        <div class="column-title">Current State: Customer Drops Off</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Pre-Trial Mindset</div>
+                            <div class="attribute-content">"I'm just an anonymous appointment. I'm nervous and it's easy to cancel if I get busy"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Pre-Trial Experience</div>
+                            <div class="attribute-content">
+                                <strong>Commitment Decay:</strong> Left alone after booking, excitement fades, replaced by anxiety and "gymtimidation"
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Post-Trial Mindset</div>
+                            <div class="attribute-content">"That was fun, but it costs a lot. I need to go home and think about it"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Post-Trial Experience</div>
+                            <div class="attribute-content">
+                                <strong>Value Gap:</strong> Price presented but value not fully absorbed, customer delays decision
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Overall Journey</div>
+                            <div class="attribute-content">Transactional - Feels like moving through a disconnected process</div>
+                        </div>
+                    </div>
+                    
+                    <div class="column optimal">
+                        <div class="column-title">Optimal State: Customer Commits</div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Pre-Trial Mindset</div>
+                            <div class="attribute-content">"Someone is expecting me personally. I know what to expect and I'm looking forward to it"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Pre-Trial Experience</div>
+                            <div class="attribute-content">
+                                <strong>Anticipation & Accountability:</strong> Automated LINE sequence builds excitement, offers tips, introduces coach personally
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Post-Trial Mindset</div>
+                            <div class="attribute-content">"That was the exact solution I've been looking for. This is an investment in my well-being"</div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Post-Trial Experience</div>
+                            <div class="attribute-content">
+                                <strong>Value Bridge:</strong> Structured debrief connects trial feeling to long-term goals, membership as clear next step
+                            </div>
+                        </div>
+                        
+                        <div class="attribute-block">
+                            <div class="attribute-label">Overall Journey</div>
+                            <div class="attribute-content">Relational - Feels like being guided on a personal journey</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Single Performance Trend Graph -->
+        <div class="trend-graph-section">
+            <div class="trend-header">
+                <h2>Long-term Conversion Trajectory</h2>
+                <p>Expected performance improvement over 12 months with optimization implementation</p>
+            </div>
+            <div class="trend-graph-container">
+                <canvas id="trendChart" width="800" height="400" style="max-width: 100%; height: auto;"></canvas>
+                
+                <div class="graph-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #e74c3c;"></span>
+                        <span>Current Average Performance: 60% with high variance (Range: 40-80% across 35 shops)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #27ae60;"></span>
+                        <span>Optimal State Implementation: Consistent improvement reaching 85% at maturity</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #3498db; opacity: 0.7;"></span>
+                        <span>Target Goal: 80% conversion rate benchmark</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // Get canvas and context
+            const canvas = document.getElementById('trendChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = 800;
+            canvas.height = 400;
+            
+            // Chart dimensions
+            const padding = 60;
+            const chartWidth = canvas.width - padding * 2;
+            const chartHeight = canvas.height - padding * 2;
+            const chartLeft = padding;
+            const chartTop = padding;
+            const chartRight = chartLeft + chartWidth;
+            const chartBottom = chartTop + chartHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = chartTop + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(chartLeft, y);
+                ctx.lineTo(chartRight, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(chartLeft, chartTop);
+            ctx.lineTo(chartLeft, chartBottom);
+            ctx.stroke();
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(chartLeft, chartBottom);
+            ctx.lineTo(chartRight, chartBottom);
+            ctx.stroke();
+            
+            // Y-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'right';
+            const yLabels = ['100%', '80%', '60%', '40%', '20%', '0%'];
+            yLabels.forEach((label, i) => {
+                const y = chartTop + (chartHeight / 5) * i;
+                ctx.fillText(label, chartLeft - 10, y + 5);
+            });
+            
+            // X-axis labels
+            ctx.textAlign = 'center';
+            const xLabels = ['Now', '3mo', '6mo', '9mo', '12mo', 'Long-term'];
+            const xPositions = [0, 0.2, 0.4, 0.6, 0.8, 1];
+            xLabels.forEach((label, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                ctx.fillText(label, x, chartBottom + 20);
+            });
+            
+            // Helper function to convert percentage to Y coordinate
+            function percentToY(percent) {
+                return chartBottom - (chartHeight * percent / 100);
+            }
+            
+            // Draw target line (80%)
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 4]);
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(chartLeft, percentToY(80));
+            ctx.lineTo(chartRight, percentToY(80));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+            
+            // Target label
+            ctx.fillStyle = '#3498db';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('Target 80%', chartRight - 40, percentToY(80) - 5);
+            
+            // Current performance line (fluctuating to show variance across different shops)
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            const currentPoints = [60, 63, 58, 62, 61, 59];
+            currentPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+            
+            // Draw variance range (shaded area showing min/max across shops)
+            ctx.fillStyle = '#e74c3c';
+            ctx.globalAlpha = 0.1;
+            ctx.beginPath();
+            const minPoints = [40, 43, 38, 42, 41, 39];
+            const maxPoints = [80, 82, 78, 81, 80, 79];
+            
+            // Draw upper boundary
+            maxPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            // Draw lower boundary (in reverse)
+            for (let i = minPoints.length - 1; i >= 0; i--) {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(minPoints[i]);
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw min/max lines
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.3;
+            ctx.setLineDash([4, 4]);
+            
+            // Max line
+            ctx.beginPath();
+            maxPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+            
+            // Min line
+            ctx.beginPath();
+            minPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 0.8;
+            
+            // Current line points
+            currentPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+            });
+            
+            // Current label with range
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 11px Arial';
+            ctx.fillText('Avg 60%', chartLeft + 60, percentToY(60) - 10);
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#e74c3c';
+            ctx.globalAlpha = 0.7;
+            ctx.fillText('Range: 40-80%', chartLeft + 60, percentToY(60) + 5);
+            ctx.globalAlpha = 1;
+            
+            // Optimal performance line (rising to 85%)
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            const optimalPoints = [60, 68, 75, 80, 83, 85];
+            optimalPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+            
+            // Optimal line points
+            optimalPoints.forEach((percent, i) => {
+                const x = chartLeft + chartWidth * xPositions[i];
+                const y = percentToY(percent);
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#27ae60';
+                ctx.fill();
+            });
+            
+            // Optimal label
+            ctx.fillStyle = '#27ae60';
+            ctx.font = 'bold 11px Arial';
+            ctx.fillText('Optimal 85%', chartRight - 45, percentToY(85) - 10);
+            
+            // Axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Implementation Timeline', canvas.width / 2, canvas.height - 10);
+            
+            // Y-axis label
+            ctx.save();
+            ctx.translate(15, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Conversion Rate', 0, 0);
+            ctx.restore();
+        </script>
+        
+        <div class="key-insights">
+            <h2 class="insights-title">Key Performance Drivers</h2>
+            
+            <div class="insight-item">
+                <div class="insight-icon"></div>
+                <div class="insight-text">
+                    <strong>Speed vs. Accuracy Trade-off:</strong> Office Team focused on error prevention sacrifice conversion speed, allowing prospect enthusiasm to cool
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon"></div>
+                <div class="insight-text">
+                    <strong>Service vs. Sales Mindset:</strong> Trainers who see themselves as fitness instructors rather than solution providers miss conversion opportunities
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon"></div>
+                <div class="insight-text">
+                    <strong>Commitment Decay:</strong> Without pre-trial engagement and post-trial value bridging, customers naturally drift away from purchase decisions
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon"></div>
+                <div class="insight-text">
+                    <strong>Transactional vs. Relational:</strong> Locations treating trials as transactions rather than relationship-building opportunities see lower conversion rates
+                </div>
+            </div>
+            
+            <div class="insight-item">
+                <div class="insight-icon"></div>
+                <div class="insight-text">
+                    <strong>Metric Misalignment:</strong> Teams measured on error rates optimize for caution, while teams measured on conversions optimize for results
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
